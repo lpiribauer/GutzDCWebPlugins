@@ -79,8 +79,8 @@ class GUTZ_DC_Events_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Event list URL', 'gutz-dc-events' ),
 				'type'        => Controls_Manager::TEXT,
 				'label_block' => true,
-				'default'     => 'https://www.2k-dart-software.com/frontend/events/5/mandant/1985',
-				'placeholder' => 'https://www.2k-dart-software.com/frontend/events/5/mandant/1985',
+				'default'     => 'https://portal.3k-darts.com/frontend/events/5/mandant/1985',
+				'placeholder' => 'https://portal.3k-darts.com/frontend/events/5/mandant/1985',
 				'description' => esc_html__( 'The public 3K Darts event page of your club. A bare mandant key such as 1985 works too.', 'gutz-dc-events' ),
 			]
 		);

@@ -2,7 +2,8 @@
 /**
  * Client for the 3K Darts event backend.
  *
- * The public event pages on 2k-dart-software.com are an Angular single page
+ * The public event pages on portal.3k-darts.com (formerly
+ * 2k-dart-software.com, which now redirects there) are an Angular single page
  * app, so their HTML holds no events. The table is filled from this JSON API,
  * which is what we query here:
  *
@@ -13,6 +14,8 @@
  *   - the "Ort" column of the public table is the `playingVenue` field
  *   - `datetime` is UTC; the site renders it in Europe/Berlin (17:00Z -> 19:00)
  *   - results come back newest first, so we re-sort ascending
+ *   - the backend's nginx answers 403 to non-browser User-Agents, including
+ *     WordPress' default "WordPress/x.y; https://…", so we send our own
  *
  * @package gutz-dc-events
  */
@@ -27,6 +30,7 @@ class GUTZ_DC_Events_API {
 
 	const API_ENDPOINT     = 'https://backend4.3k-darts.com/2k-backend4/api/v1/frontend/event/page';
 	const DEFAULT_ORIGIN   = 'https://portal.3k-darts.com';
+	const USER_AGENT       = 'Mozilla/5.0 (compatible; GUTZ-DC-Events/' . GUTZ_DC_EVENTS_VERSION . '; +https://www.gutz-dc.de/)';
 	const DEFAULT_TIMEZONE = 'Europe/Berlin';
 	const PAGE_SIZE        = 200;
 	const MAX_PAGES        = 25;
@@ -60,7 +64,7 @@ class GUTZ_DC_Events_API {
 	 * Pulls the mandant key out of an event list URL.
 	 *
 	 * Accepts the full page URL, e.g.
-	 *   https://www.2k-dart-software.com/frontend/events/5/mandant/1985
+	 *   https://portal.3k-darts.com/frontend/events/5/mandant/1985
 	 * or a bare mandant key, e.g. "1985".
 	 *
 	 * @return array{mandant_key:int,origin:string}|WP_Error
@@ -83,7 +87,7 @@ class GUTZ_DC_Events_API {
 		if ( preg_match( '#/mandant/(\d+)#', $url, $matches ) !== 1 ) {
 			return new WP_Error(
 				'gutz_dc_events_bad_url',
-				__( 'That does not look like a 3K Darts event list URL. Expected something like https://www.2k-dart-software.com/frontend/events/5/mandant/1985', 'gutz-dc-events' )
+				__( 'That does not look like a 3K Darts event list URL. Expected something like https://portal.3k-darts.com/frontend/events/5/mandant/1985', 'gutz-dc-events' )
 			);
 		}
 
@@ -211,8 +215,13 @@ class GUTZ_DC_Events_API {
 			$response = wp_remote_get(
 				$url,
 				[
-					'timeout' => self::HTTP_TIMEOUT,
-					'headers' => [ 'Accept' => 'application/json' ],
+					'timeout'    => self::HTTP_TIMEOUT,
+					'user-agent' => self::USER_AGENT,
+					'headers'    => [
+						'Accept'  => 'application/json',
+						'Origin'  => self::DEFAULT_ORIGIN,
+						'Referer' => self::DEFAULT_ORIGIN . '/',
+					],
 				]
 			);
 
