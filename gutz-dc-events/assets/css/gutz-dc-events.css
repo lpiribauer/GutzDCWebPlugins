@@ -1,0 +1,87 @@
+/* GUTZ DC Events — deliberately light, so Elementor's style controls win. */
+
+.gutz-events {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* Row = icon + content. Keeping the text in its own wrapper means the icon
+   stays in front even when the text wraps onto several lines. */
+.gutz-events__item {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+	margin: 0;
+}
+
+.gutz-events--divided .gutz-events__item + .gutz-events__item {
+	padding-top: 16px;
+	border-top: 1px solid rgba(127, 127, 127, 0.25);
+}
+
+.gutz-events__icon {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+}
+
+.gutz-events__icon svg {
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
+}
+
+.gutz-events__content {
+	display: flex;
+	flex: 1 1 auto;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 12px;
+	min-width: 0;
+}
+
+.gutz-events__date {
+	flex: 0 0 auto;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+	opacity: 0.85;
+}
+
+.gutz-events__name {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-weight: 600;
+}
+
+.gutz-events__venue {
+	flex: 0 1 auto;
+	min-width: 0;
+	opacity: 0.75;
+}
+
+.gutz-events__link {
+	flex: 0 0 auto;
+	text-decoration: underline;
+}
+
+.gutz-events__empty,
+.gutz-events__error {
+	margin: 0;
+}
+
+.gutz-events__error {
+	color: #b60000;
+}
+
+@media (max-width: 480px) {
+	.gutz-events__content {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}

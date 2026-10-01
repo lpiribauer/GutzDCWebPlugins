@@ -1,0 +1,126 @@
+/* GUTZ DC Matches — deliberately light, so Elementor's style controls win. */
+
+.gutz-matches {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.gutz-matches__item {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: 0;
+}
+
+.gutz-matches--divided .gutz-matches__item + .gutz-matches__item {
+	padding-top: 20px;
+	border-top: 1px solid rgba(127, 127, 127, 0.25);
+}
+
+/* Played matches step back so the upcoming ones read as the live part of
+   the list. */
+.gutz-matches__item--past {
+	opacity: 0.5;
+}
+
+.gutz-matches__date {
+	font-variant-numeric: tabular-nums;
+	opacity: 0.85;
+}
+
+/* Home and away share the row evenly, so the separator stays centred no
+   matter how long the club names are. */
+.gutz-matches__teams {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.gutz-matches__team {
+	display: flex;
+	flex: 1 1 0;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+}
+
+/* The away side is mirrored — logo outward, name towards the middle — which
+   is how fixtures are read. The markup order stays the same for both sides. */
+.gutz-matches__team--away {
+	flex-direction: row-reverse;
+	text-align: right;
+}
+
+.gutz-matches__logo {
+	flex: 0 0 auto;
+	width: 44px;
+	height: 44px;
+	object-fit: contain;
+}
+
+.gutz-matches__logo--empty {
+	display: inline-block;
+}
+
+.gutz-matches__team-name {
+	min-width: 0;
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+.gutz-matches__vs {
+	flex: 0 0 auto;
+	opacity: 0.6;
+}
+
+/* Sits where the separator sits on a fixture, so played and upcoming rows
+   line up in the same three columns. */
+.gutz-matches__result {
+	flex: 0 0 auto;
+	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+/* flex-start keeps the hit area on the text instead of the whole row width. */
+.gutz-matches__report {
+	align-self: flex-start;
+	text-decoration: underline;
+}
+
+.gutz-matches__empty,
+.gutz-matches__error {
+	margin: 0;
+}
+
+.gutz-matches__error {
+	color: #b60000;
+}
+
+/* Narrow columns: stack the two teams instead of squeezing the names. */
+@media (max-width: 480px) {
+	.gutz-matches__teams {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 6px;
+	}
+
+	.gutz-matches__team--away {
+		flex-direction: row;
+		text-align: left;
+	}
+
+	/* The separator carries no meaning once the teams are stacked, but the
+	   result does — so it stays and centres between them. */
+	.gutz-matches__vs {
+		display: none;
+	}
+
+	.gutz-matches__result {
+		text-align: center;
+	}
+}
