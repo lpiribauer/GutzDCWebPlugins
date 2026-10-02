@@ -70,6 +70,11 @@
 	text-decoration: underline;
 }
 
+.gutz-events__no-link {
+	flex: 0 0 auto;
+	opacity: 0.75;
+}
+
 .gutz-events__empty,
 .gutz-events__error {
 	margin: 0;

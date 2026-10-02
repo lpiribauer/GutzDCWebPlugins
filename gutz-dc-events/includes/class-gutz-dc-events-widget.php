@@ -180,6 +180,18 @@ class GUTZ_DC_Events_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'no_registration_text',
+			[
+				'label'       => esc_html__( 'Text without registration link', 'gutz-dc-events' ),
+				'type'        => Controls_Manager::TEXT,
+				'label_block' => true,
+				'default'     => esc_html__( 'Anmeldung folgt', 'gutz-dc-events' ),
+				'description' => esc_html__( 'Shown when a tournament has no open registration yet. Leave empty to show nothing.', 'gutz-dc-events' ),
+				'condition'   => [ 'show_registration' => 'yes' ],
+			]
+		);
+
+		$this->add_control(
 			'open_in_new_tab',
 			[
 				'label'        => esc_html__( 'Open in new tab', 'gutz-dc-events' ),
@@ -459,6 +471,27 @@ class GUTZ_DC_Events_Widget extends Widget_Base {
 			]
 		);
 
+		$this->add_control(
+			'no_registration_color',
+			[
+				'label'     => esc_html__( 'Text without link: color', 'gutz-dc-events' ),
+				'type'      => Controls_Manager::COLOR,
+				'separator' => 'before',
+				'selectors' => [
+					'{{WRAPPER}} .gutz-events__no-link' => 'color: {{VALUE}};',
+				],
+			]
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			[
+				'name'     => 'no_registration_typography',
+				'label'    => esc_html__( 'Text without link: typography', 'gutz-dc-events' ),
+				'selector' => '{{WRAPPER}} .gutz-events__no-link',
+			]
+		);
+
 		$this->end_controls_section();
 	}
 
@@ -501,6 +534,8 @@ class GUTZ_DC_Events_Widget extends Widget_Base {
 		if ( '' === trim( $link_label ) ) {
 			$link_label = esc_html__( 'Zur Anmeldung', 'gutz-dc-events' );
 		}
+
+		$no_link_text = trim( (string) ( $settings['no_registration_text'] ?? '' ) );
 
 		$link_attrs = 'yes' === ( $settings['open_in_new_tab'] ?? '' )
 			? ' target="_blank" rel="noopener noreferrer"'
@@ -547,6 +582,8 @@ class GUTZ_DC_Events_Widget extends Widget_Base {
 							<a class="gutz-events__link" href="<?php echo esc_url( $event['registration_url'] ); ?>"<?php echo $link_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static markup ?>>
 								<?php echo esc_html( $link_label ); ?>
 							</a>
+						<?php elseif ( $show_link && '' !== $no_link_text ) : ?>
+							<span class="gutz-events__no-link"><?php echo esc_html( $no_link_text ); ?></span>
 						<?php endif; ?>
 					</span>
 				</li>
