@@ -1,0 +1,16 @@
+/* GUTZ DC Average — deliberately light, so Elementor's style controls win. */
+
+.gutz-average {
+	margin: 0;
+}
+
+.gutz-average__value {
+	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.gutz-average__error {
+	margin: 0;
+	color: #b60000;
+}

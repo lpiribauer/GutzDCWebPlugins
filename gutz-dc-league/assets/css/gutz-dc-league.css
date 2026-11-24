@@ -1,0 +1,145 @@
+/* GUTZ DC League — deliberately light, so Elementor's style controls win. */
+
+.gutz-league {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.gutz-league__item {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: 0;
+}
+
+.gutz-league--divided .gutz-league__item + .gutz-league__item {
+	padding-top: 20px;
+	border-top: 1px solid rgba(127, 127, 127, 0.25);
+}
+
+/* Played matches step back so the upcoming ones read as the live part of
+   the list. */
+.gutz-league__item--past {
+	opacity: 0.5;
+}
+
+.gutz-league__title {
+	margin: 0 0 16px;
+}
+
+.gutz-league__title-link {
+	color: inherit;
+	text-decoration: none;
+}
+
+.gutz-league__title-link:hover,
+.gutz-league__title-link:focus {
+	text-decoration: underline;
+}
+
+.gutz-league__meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 12px;
+	opacity: 0.85;
+}
+
+.gutz-league__date {
+	font-variant-numeric: tabular-nums;
+}
+
+.gutz-league__round::before {
+	content: "·";
+	margin-right: 12px;
+}
+
+.gutz-league__live {
+	padding: 0 6px;
+	border-radius: 3px;
+	background: #b60000;
+	color: #fff;
+	font-size: 0.8em;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+/* Home and away share the row evenly, so the separator stays centred no
+   matter how long the club names are. */
+.gutz-league__teams {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.gutz-league__team {
+	flex: 1 1 0;
+	min-width: 0;
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+.gutz-league__team--away {
+	text-align: right;
+}
+
+.gutz-league__vs {
+	flex: 0 0 auto;
+	opacity: 0.6;
+}
+
+/* Sits where the separator sits on a fixture, so played and upcoming rows
+   line up in the same three columns. */
+.gutz-league__result {
+	flex: 0 0 auto;
+	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.gutz-league__venue {
+	font-size: 0.9em;
+	opacity: 0.75;
+}
+
+/* flex-start keeps the hit area on the text instead of the whole row width. */
+.gutz-league__report {
+	align-self: flex-start;
+	text-decoration: underline;
+}
+
+.gutz-league__empty,
+.gutz-league__error {
+	margin: 0;
+}
+
+.gutz-league__error {
+	color: #b60000;
+}
+
+/* Narrow columns: stack the two teams instead of squeezing the names. */
+@media (max-width: 480px) {
+	.gutz-league__teams {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 6px;
+	}
+
+	.gutz-league__team--away {
+		text-align: left;
+	}
+
+	/* The separator carries no meaning once the teams are stacked, but the
+	   result does — so it stays and centres between them. */
+	.gutz-league__vs {
+		display: none;
+	}
+
+	.gutz-league__result {
+		text-align: center;
+	}
+}
