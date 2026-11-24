@@ -33,6 +33,11 @@ class GUTZ_DC_Matches_API {
 	/** Match protocol page: %1$s = season league UUID, %2$s = match UUID. */
 	const REPORT_URL = 'https://verwaltung.mitteldeutsche-steeldartliga.de/season-leagues/%1$s/matches/%2$s';
 
+	/** League page: %s = season league UUID. */
+	const LEAGUE_URL = 'https://verwaltung.mitteldeutsche-steeldartliga.de/season-leagues/%s';
+
+	const SITE_ORIGIN      = 'https://verwaltung.mitteldeutsche-steeldartliga.de';
+	const USER_AGENT       = '';
 	const DEFAULT_TIMEZONE = 'Europe/Berlin';
 	const HTTP_TIMEOUT     = 15;
 	const CACHE_PREFIX     = 'gutz_dc_matches_';
@@ -103,6 +108,7 @@ fragment SeasonLeagueMatchesFields on seasonLeagueType {
   location
   league {
     id
+    name
     isTournament
     __typename
   }
@@ -134,6 +140,13 @@ GRAPHQL;
 		} catch ( Exception $e ) {
 			return wp_timezone();
 		}
+	}
+
+	/** Link to the season league page, or '' when the ID is not valid. */
+	public static function league_url( string $value ): string {
+		$league_id = self::parse_league_id( $value );
+
+		return is_wp_error( $league_id ) ? '' : sprintf( self::LEAGUE_URL, rawurlencode( $league_id ) );
 	}
 
 	/**
@@ -208,6 +221,8 @@ GRAPHQL;
 		$now      = time();
 		$needle   = self::normalize( (string) $args['team'] );
 
+		$league_name = (string) $payload['league_name'];
+
 		$past     = [];
 		$upcoming = [];
 
@@ -216,7 +231,7 @@ GRAPHQL;
 				continue;
 			}
 
-			$match = self::map_match( $raw, $timezone, $league_id );
+			$match = self::map_match( $raw, $timezone, $league_id, $league_name );
 			if ( null === $match ) {
 				continue;
 			}
@@ -305,7 +320,7 @@ GRAPHQL;
 	/**
 	 * Runs the GraphQL query and caches the interesting parts of the answer.
 	 *
-	 * @return array{matches:array<int,mixed>,teams:array<int,mixed>}|WP_Error
+	 * @return array{matches:array<int,mixed>,teams:array<int,mixed>,league_name:string}|WP_Error
 	 */
 	private static function fetch_payload( string $league_id, int $cache_minutes ) {
 		$league_id = self::parse_league_id( $league_id );
@@ -317,7 +332,7 @@ GRAPHQL;
 
 		if ( $cache_minutes > 0 ) {
 			$cached = get_transient( $cache_key );
-			if ( is_array( $cached ) && isset( $cached['matches'], $cached['teams'] ) ) {
+			if ( is_array( $cached ) && isset( $cached['matches'], $cached['teams'], $cached['league_name'] ) ) {
 				return $cached;
 			}
 		}
@@ -325,12 +340,16 @@ GRAPHQL;
 		$response = wp_remote_post(
 			self::API_ENDPOINT,
 			[
-				'timeout' => self::HTTP_TIMEOUT,
-				'headers' => [
-					'Content-Type' => 'application/json',
-					'Accept'       => 'application/json',
+				'timeout'    => self::HTTP_TIMEOUT,
+				'user-agent' => self::USER_AGENT,
+				'headers'    => [
+					'Content-Type'             => 'application/json',
+					'Accept'                   => 'application/json',
+					'Apollo-Require-Preflight' => 'true',
+					'Origin'                   => self::SITE_ORIGIN,
+					'Referer'                  => self::SITE_ORIGIN . '/',
 				],
-				'body'    => wp_json_encode(
+				'body'       => wp_json_encode(
 					[
 						'operationName' => 'seasonLeagueMatches',
 						'variables'     => [ 'seasonLeagueId' => $league_id ],
@@ -380,8 +399,9 @@ GRAPHQL;
 		$teams = $body['data']['seasonLeague']['seasonTeams'] ?? [];
 
 		$payload = [
-			'matches' => $body['data']['matches'],
-			'teams'   => is_array( $teams ) ? $teams : [],
+			'matches'     => $body['data']['matches'],
+			'teams'       => is_array( $teams ) ? $teams : [],
+			'league_name' => trim( (string) ( $body['data']['seasonLeague']['league']['name'] ?? '' ) ),
 		];
 
 		if ( $cache_minutes > 0 ) {
@@ -397,7 +417,7 @@ GRAPHQL;
 	 *
 	 * @return array<string,mixed>|null null when the date or a team is missing
 	 */
-	private static function map_match( array $raw, DateTimeZone $timezone, string $league_id ): ?array {
+	private static function map_match( array $raw, DateTimeZone $timezone, string $league_id, string $league_name ): ?array {
 		if ( empty( $raw['dateTime'] ) ) {
 			return null;
 		}
@@ -429,6 +449,7 @@ GRAPHQL;
 			'away'          => $away,
 			'timestamp'     => $utc->getTimestamp(),
 			'datetime_attr' => $utc->setTimezone( $timezone )->format( DATE_ATOM ),
+			'league_name'   => $league_name,
 			'match_day'     => isset( $raw['matchDay'] ) ? (int) $raw['matchDay'] : 0,
 			'home_sets'     => $home_sets,
 			'away_sets'     => $away_sets,

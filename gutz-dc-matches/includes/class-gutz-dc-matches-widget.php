@@ -143,6 +143,19 @@ class GUTZ_DC_Matches_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'show_league',
+			[
+				'label'        => esc_html__( 'League title link', 'gutz-dc-matches' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'label_on'     => esc_html__( 'Show', 'gutz-dc-matches' ),
+				'label_off'    => esc_html__( 'Hide', 'gutz-dc-matches' ),
+				'default'      => 'yes',
+				'return_value' => 'yes',
+				'description'  => esc_html__( 'Shows the league name above the matches, linked to the league in the administration.', 'gutz-dc-matches' ),
+			]
+		);
+
+		$this->add_control(
 			'timezone',
 			[
 				'label'       => esc_html__( 'Time zone', 'gutz-dc-matches' ),
@@ -281,6 +294,36 @@ class GUTZ_DC_Matches_Widget extends Widget_Base {
 					'{{WRAPPER}} .gutz-matches__item + .gutz-matches__item' => 'border-top-color: {{VALUE}};',
 				],
 				'condition' => [ 'show_divider' => 'yes' ],
+			]
+		);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'section_style_league',
+			[
+				'label'     => esc_html__( 'League title', 'gutz-dc-matches' ),
+				'tab'       => Controls_Manager::TAB_STYLE,
+				'condition' => [ 'show_league' => 'yes' ],
+			]
+		);
+
+		$this->add_control(
+			'league_color',
+			[
+				'label'     => esc_html__( 'Color', 'gutz-dc-matches' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => [
+					'{{WRAPPER}} .gutz-matches__league, {{WRAPPER}} .gutz-matches__league-link' => 'color: {{VALUE}};',
+				],
+			]
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			[
+				'name'     => 'league_typography',
+				'selector' => '{{WRAPPER}} .gutz-matches__league',
 			]
 		);
 
@@ -504,7 +547,8 @@ class GUTZ_DC_Matches_Widget extends Widget_Base {
 			$date_format = 'D, d.m.Y, H:i';
 		}
 
-		$show_logos = 'yes' === ( $settings['show_logos'] ?? '' );
+		$show_logos  = 'yes' === ( $settings['show_logos'] ?? '' );
+		$show_league = 'yes' === ( $settings['show_league'] ?? 'yes' );
 		$separator  = trim( (string) ( $settings['separator_text'] ?? '' ) );
 
 		$show_report  = 'yes' === ( $settings['show_report'] ?? '' );
@@ -529,6 +573,25 @@ class GUTZ_DC_Matches_Widget extends Widget_Base {
 				$show_logos ? 'gutz-matches--with-logos' : '',
 			]
 		);
+
+		$league_name = (string) $matches[0]['league_name'];
+		$league_url  = GUTZ_DC_Matches_API::league_url( $league_id );
+
+		if ( $show_league && '' !== $league_name ) :
+			?>
+			<h6 class="gutz-matches__league">
+				<?php if ( '' !== $league_url ) : ?>
+					<a
+						class="gutz-matches__league-link"
+						href="<?php echo esc_url( $league_url ); ?>"
+						<?php echo $report_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static markup ?>
+					><?php echo esc_html( $league_name ); ?></a>
+				<?php else : ?>
+					<?php echo esc_html( $league_name ); ?>
+				<?php endif; ?>
+			</h6>
+			<?php
+		endif;
 
 		?>
 		<ul <?php $this->print_render_attribute_string( 'list' ); ?>>

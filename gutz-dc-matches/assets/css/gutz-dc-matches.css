@@ -27,6 +27,20 @@
 	opacity: 0.5;
 }
 
+.gutz-matches__league {
+	margin: 0 0 16px;
+}
+
+.gutz-matches__league-link {
+	color: inherit;
+	text-decoration: none;
+}
+
+.gutz-matches__league-link:hover,
+.gutz-matches__league-link:focus {
+	text-decoration: underline;
+}
+
 .gutz-matches__date {
 	font-variant-numeric: tabular-nums;
 	opacity: 0.85;
