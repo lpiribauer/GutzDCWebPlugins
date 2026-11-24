@@ -88,11 +88,12 @@ class GUTZ_DC_Events_Widget extends Widget_Base {
 		$this->add_control(
 			'venue_filter',
 			[
-				'label'       => esc_html__( 'Only this venue (Ort)', 'gutz-dc-events' ),
-				'type'        => Controls_Manager::TEXT,
+				'label'       => esc_html__( 'Only these venues (Ort)', 'gutz-dc-events' ),
+				'type'        => Controls_Manager::TEXTAREA,
+				'rows'        => 3,
 				'label_block' => true,
 				'default'     => 'Vereinsheim GUTZ DC e.V',
-				'description' => esc_html__( 'Matches the Ort column, upper/lower case is ignored. Leave empty to list every venue.', 'gutz-dc-events' ),
+				'description' => esc_html__( 'One venue per line. An event is listed if its Ort matches any line; upper/lower case is ignored. Leave empty to list every venue.', 'gutz-dc-events' ),
 			]
 		);
 
@@ -149,11 +150,11 @@ class GUTZ_DC_Events_Widget extends Widget_Base {
 				'type'        => Controls_Manager::SELECT,
 				'default'     => 'auto',
 				'options'     => [
-					'auto'   => esc_html__( 'Only when no venue filter is set', 'gutz-dc-events' ),
+					'auto'   => esc_html__( 'Unless filtered to a single venue', 'gutz-dc-events' ),
 					'always' => esc_html__( 'Always', 'gutz-dc-events' ),
 					'never'  => esc_html__( 'Never', 'gutz-dc-events' ),
 				],
-				'description' => esc_html__( 'With a venue filter every event is at the same place, so the venue is redundant.', 'gutz-dc-events' ),
+				'description' => esc_html__( 'With a single venue filter every event is at the same place, so the venue is redundant.', 'gutz-dc-events' ),
 			]
 		);
 
@@ -544,9 +545,10 @@ class GUTZ_DC_Events_Widget extends Widget_Base {
 		$icon     = isset( $settings['list_icon'] ) && is_array( $settings['list_icon'] ) ? $settings['list_icon'] : [];
 		$has_icon = ! empty( $icon['value'] );
 
-		// 'auto' shows the venue only when the list is not already filtered to one.
+		// 'auto' shows the venue unless the list is filtered to exactly one.
+		$venue_lines = array_filter( array_map( 'trim', preg_split( '/\R/u', $venue_filter ) ?: [] ), 'strlen' );
 		$show_venue = 'always' === ( $settings['show_venue'] ?? 'auto' )
-			|| ( 'auto' === ( $settings['show_venue'] ?? 'auto' ) && '' === trim( $venue_filter ) );
+			|| ( 'auto' === ( $settings['show_venue'] ?? 'auto' ) && 1 !== count( $venue_lines ) );
 
 		// wp_date() falls back to the site time zone, so pass the resolved one.
 		$display_tz = GUTZ_DC_Events_API::resolve_timezone( $timezone );

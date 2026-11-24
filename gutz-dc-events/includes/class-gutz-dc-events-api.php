@@ -109,7 +109,7 @@ class GUTZ_DC_Events_API {
 	 *
 	 * @param array{
 	 *     list_url?:string,
-	 *     venue?:string,
+	 *     venue?:string|string[],
 	 *     event_type?:string,
 	 *     limit?:int,
 	 *     cache_minutes?:int
@@ -146,7 +146,7 @@ class GUTZ_DC_Events_API {
 
 		$timezone = self::resolve_timezone( (string) $args['timezone'] );
 		$now      = time();
-		$needle   = self::normalize( (string) $args['venue'] );
+		$needles  = self::parse_venues( $args['venue'] );
 
 		$events = [];
 		foreach ( $raw_events as $raw ) {
@@ -155,7 +155,7 @@ class GUTZ_DC_Events_API {
 			}
 
 			$venue = isset( $raw['playingVenue'] ) ? (string) $raw['playingVenue'] : '';
-			if ( '' !== $needle && false === strpos( self::normalize( $venue ), $needle ) ) {
+			if ( [] !== $needles && ! self::venue_matches( $venue, $needles ) ) {
 				continue;
 			}
 
@@ -297,6 +297,41 @@ class GUTZ_DC_Events_API {
 			'kind'             => isset( $raw['eventKindCd'] ) ? (string) $raw['eventKindCd'] : '',
 			'registration_url' => $registration_url,
 		];
+	}
+
+	/**
+	 * Turns the venue setting into normalized needles. Accepts an array or a
+	 * string with one venue per line (commas stay part of the name).
+	 *
+	 * @param string|array<int,mixed> $venues
+	 * @return string[]
+	 */
+	private static function parse_venues( $venues ): array {
+		if ( ! is_array( $venues ) ) {
+			$venues = preg_split( '/\R/u', (string) $venues );
+		}
+
+		$needles = [];
+		foreach ( (array) $venues as $venue ) {
+			$needle = self::normalize( (string) $venue );
+			if ( '' !== $needle ) {
+				$needles[] = $needle;
+			}
+		}
+
+		return array_values( array_unique( $needles ) );
+	}
+
+	/** @param string[] $needles */
+	private static function venue_matches( string $venue, array $needles ): bool {
+		$haystack = self::normalize( $venue );
+		foreach ( $needles as $needle ) {
+			if ( false !== strpos( $haystack, $needle ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
